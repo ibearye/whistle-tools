@@ -6,6 +6,8 @@ const modifyResponse = (ctx, fn = v => v) => {
   const client = req.request(svrRes => {
     let body;
 
+    Reflect.deleteProperty(svrRes.headers, 'content-length');
+
     svrRes.on(
       'data',
       data => (body = body ? Buffer.concat([body, data]) : data)
