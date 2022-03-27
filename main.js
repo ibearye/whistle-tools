@@ -2,6 +2,7 @@
 
 const utils = require('./utils');
 const { program } = require('commander');
+const path = require('path');
 
 program.version('0.1.0');
 
@@ -38,6 +39,10 @@ program.command('status').action(() => {
   console.log('HTTP PROXY:', http ? 'Yes' : 'No');
   console.log('HTTPS PROXY:', https ? 'Yes' : 'No');
   console.log('SOCKS PROXY:', socks ? 'Yes' : 'No');
+});
+
+program.command('utils-path').action(() => {
+  console.log(path.resolve(__dirname, 'whistle.script_utils'));
 });
 
 program.parse(process.argv);
