@@ -33,6 +33,14 @@ const modifyResponse = (ctx, fn = v => v) => {
   req.pipe(client);
 };
 
+const modifyJSONResponse = (ctx, fn = v => v) => {
+  modifyResponse(ctx, res => {
+    res.body = JSON.parse(res.body);
+    return fn(res);
+  });
+};
+
 module.exports = {
-  modifyResponse
+  modifyResponse,
+  modifyJSONResponse
 };
