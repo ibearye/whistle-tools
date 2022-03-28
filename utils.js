@@ -5,11 +5,11 @@ const startW2 = () => childProcess.execSync('w2 start');
 const stopW2 = () => childProcess.execSync('w2 stop');
 
 const getW2Config = () => {
-  const [ip, port] = childProcess
+  const matched = childProcess
     .execSync('w2 status')
     .toString()
-    .match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}/)[0]
-    .split(':');
+    .match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}/);
+  const [ip, port] = (matched ? matched[0] : ':').split(':');
   return { ip, port };
 };
 
@@ -38,25 +38,54 @@ const getValidServices = () => {
   return filterValidServices(getServices());
 };
 
-const proxy = ({ ip, port } = getW2Config()) => {
+const proxySwitch = { http: true, https: true, socks: false };
+
+const proxy = ({ http = true, https = true, socks = false } = proxySwitch) => {
+  const { ip, port } = getW2Config();
   getValidServices().forEach(service => {
-    childProcess.execSync(
-      `networksetup -setwebproxy "${service}" "${ip}" "${port}" && networksetup -setwebproxystate "${service}" on`
-    );
-    childProcess.execSync(
-      `networksetup -setsecurewebproxy "${service}" "${ip}" "${port}" && networksetup -setsecurewebproxystate "${service}" on`
-    );
-    childProcess.execSync(
-      `networksetup -setsocksfirewallproxy "${service}" "${ip}" "${port}" && networksetup -setsocksfirewallproxystate "${service}" on`
-    );
+    if (http) {
+      childProcess.execSync(
+        `networksetup -setwebproxy "${service}" "${ip}" "${port}" && networksetup -setwebproxystate "${service}" on`
+      );
+    }
+
+    if (https) {
+      childProcess.execSync(
+        `networksetup -setsecurewebproxy "${service}" "${ip}" "${port}" && networksetup -setsecurewebproxystate "${service}" on`
+      );
+    }
+
+    if (socks) {
+      childProcess.execSync(
+        `networksetup -setsocksfirewallproxy "${service}" "${ip}" "${port}" && networksetup -setsocksfirewallproxystate "${service}" on`
+      );
+    }
   });
 };
 
-const unproxy = () => {
+const unproxySwitch = { http: true, https: true, socks: true };
+
+const unproxy = ({
+  http = true,
+  https = true,
+  socks = true
+} = unproxySwitch) => {
   getValidServices().forEach(service => {
-    childProcess.execSync(
-      `networksetup -setwebproxystate "${service}" off && networksetup -setsecurewebproxystate "${service}" off && networksetup -setsocksfirewallproxystate "${service}" off`
-    );
+    if (http) {
+      childProcess.execSync(`networksetup -setwebproxystate "${service}" off`);
+    }
+
+    if (https) {
+      childProcess.execSync(
+        `networksetup -setsecurewebproxystate "${service}" off`
+      );
+    }
+
+    if (socks) {
+      childProcess.execSync(
+        `networksetup -setsocksfirewallproxystate "${service}" off`
+      );
+    }
   });
 };
 

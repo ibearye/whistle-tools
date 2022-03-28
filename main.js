@@ -6,12 +6,18 @@ const path = require('path');
 
 program.version('0.1.0');
 
-program.command('start').action(() => {
-  if (!utils.isW2Running()) {
-    utils.startW2();
-  }
-  utils.proxy();
-});
+program
+  .command('start')
+  .option('--no-auto-proxy', 'auto proxy after starting', true)
+  .action(({ autoProxy }) => {
+    if (!utils.isW2Running()) {
+      utils.startW2();
+    }
+
+    if (autoProxy) {
+      utils.proxy();
+    }
+  });
 
 program.command('stop').action(() => {
   if (utils.isW2Running()) {
@@ -21,17 +27,35 @@ program.command('stop').action(() => {
   utils.unproxy();
 });
 
-program.command('proxy').action(() => {
-  if (!utils.isW2Running()) {
-    return console.log('whistle is not running, please start it first!');
-  }
+program
+  .command('proxy')
+  .option('-s --socks', 'proxy socks protocal', false)
+  .option('-h --http', 'proxy http protocal', false)
+  .option('-H --https', 'proxy https protocol', false)
+  .action(({ socks, http, https }) => {
+    if (!utils.isW2Running()) {
+      return console.log('whistle is not running, please start it first!');
+    }
 
-  utils.proxy();
-});
+    if (socks || http || https) {
+      utils.proxy({ socks, http, https });
+    } else {
+      utils.proxy();
+    }
+  });
 
-program.command('unproxy').action(() => {
-  utils.unproxy();
-});
+program
+  .command('unproxy')
+  .option('-s --socks', 'proxy socks protocal', false)
+  .option('-h --http', 'proxy http protocal', false)
+  .option('-H --https', 'proxy https protocol', false)
+  .action(({ socks, http, https }) => {
+    if (socks || http || https) {
+      utils.unproxy({ socks, http, https });
+    } else {
+      utils.unproxy();
+    }
+  });
 
 program.command('status').action(() => {
   const { http, https, socks } = utils.isProxying();
