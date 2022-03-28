@@ -26,8 +26,8 @@ const getServices = () => {
     .slice(1, -1);
 };
 
-const filterValidServices = (services) => {
-  return services.filter((service) =>
+const filterValidServices = services => {
+  return services.filter(service =>
     /\nip\s?address:/gi.test(
       childProcess.execSync(`networksetup -getinfo "${service}"`).toString()
     )
@@ -39,7 +39,7 @@ const getValidServices = () => {
 };
 
 const proxy = ({ ip, port } = getW2Config()) => {
-  getValidServices().forEach((service) => {
+  getValidServices().forEach(service => {
     childProcess.execSync(
       `networksetup -setwebproxy "${service}" "${ip}" "${port}" && networksetup -setwebproxystate "${service}" on`
     );
@@ -53,7 +53,7 @@ const proxy = ({ ip, port } = getW2Config()) => {
 };
 
 const unproxy = () => {
-  getValidServices().forEach((service) => {
+  getValidServices().forEach(service => {
     childProcess.execSync(
       `networksetup -setwebproxystate "${service}" off && networksetup -setsecurewebproxystate "${service}" off && networksetup -setsocksfirewallproxystate "${service}" off`
     );
@@ -61,29 +61,48 @@ const unproxy = () => {
 };
 
 const isProxying = () => {
+  const { ip, port } = getW2Config();
   const services = getValidServices();
   return {
     http: services
-      .map((service) =>
+      .map(service =>
         childProcess
           .execSync(`networksetup -getwebproxy "${service}"`)
           .toString()
       )
-      .every((status) => /enabled\:\s?yes/gi.test(status)),
+      .every(
+        status =>
+          /enabled\:\s?yes/gi.test(status) &&
+          status.match(/server:\s?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i)[1] ===
+            ip &&
+          status.match(/port:\s?(\d{1,5})/i)[1] === port
+      ),
     https: services
-      .map((service) =>
+      .map(service =>
         childProcess
           .execSync(`networksetup -getsecurewebproxy "${service}"`)
           .toString()
       )
-      .every((status) => /enabled\:\s?yes/gi.test(status)),
+      .every(
+        status =>
+          /enabled\:\s?yes/gi.test(status) &&
+          status.match(/server:\s?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i)[1] ===
+            ip &&
+          status.match(/port:\s?(\d{1,5})/i)[1] === port
+      ),
     socks: services
-      .map((service) =>
+      .map(service =>
         childProcess
           .execSync(`networksetup -getsocksfirewallproxy "${service}"`)
           .toString()
       )
-      .every((status) => /enabled\:\s?yes/gi.test(status)),
+      .every(
+        status =>
+          /enabled\:\s?yes/gi.test(status) &&
+          status.match(/server:\s?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i)[1] ===
+            ip &&
+          status.match(/port:\s?(\d{1,5})/i)[1] === port
+      )
   };
 };
 
@@ -97,5 +116,5 @@ module.exports = {
   stopW2,
   getW2Config,
   isW2Running,
-  isProxying,
+  isProxying
 };
