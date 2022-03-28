@@ -5,11 +5,11 @@ const startW2 = () => childProcess.execSync('w2 start');
 const stopW2 = () => childProcess.execSync('w2 stop');
 
 const getW2Config = () => {
-  const matched = childProcess
+  const matched = ;
+  const [ip, port] = (childProcess
     .execSync('w2 status')
     .toString()
-    .match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}/);
-  const [ip, port] = (matched ? matched[0] : ':').split(':');
+    .match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}/)?.[0] ?? ':').split(':');
   return { ip, port };
 };
 
@@ -102,9 +102,9 @@ const isProxying = () => {
       .every(
         status =>
           /enabled\:\s?yes/gi.test(status) &&
-          status.match(/server:\s?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i)[1] ===
+          status.match(/server:\s?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i)?.[1] ===
             ip &&
-          status.match(/port:\s?(\d{1,5})/i)[1] === port
+          status.match(/port:\s?(\d{1,5})/i)?.[1] === port
       ),
     https: services
       .map(service =>
@@ -115,7 +115,7 @@ const isProxying = () => {
       .every(
         status =>
           /enabled\:\s?yes/gi.test(status) &&
-          status.match(/server:\s?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i)[1] ===
+          status.match(/server:\s?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i)?.[1] ===
             ip &&
           status.match(/port:\s?(\d{1,5})/i)[1] === port
       ),
@@ -128,9 +128,9 @@ const isProxying = () => {
       .every(
         status =>
           /enabled\:\s?yes/gi.test(status) &&
-          status.match(/server:\s?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i)[1] ===
+          status.match(/server:\s?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i)?.[1] ===
             ip &&
-          status.match(/port:\s?(\d{1,5})/i)[1] === port
+          status.match(/port:\s?(\d{1,5})/i)?.[1] === port
       )
   };
 };
