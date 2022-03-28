@@ -36,7 +36,11 @@ const modifyResponse = (ctx, fn = v => v) => {
 const modifyJSONResponse = (ctx, fn = v => v) => {
   modifyResponse(ctx, res => {
     res.body = JSON.parse(res.body);
-    return fn(res);
+    const newRes = fn(res);
+
+    newRes.body = typeof newRes.body === 'object' ? JSON.stringify(newRes.body) : newRes.body;
+
+    return newRes;
   });
 };
 
